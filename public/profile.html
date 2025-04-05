@@ -1,0 +1,1347 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>FinMentor - Your Financial AI Manager</title>
+      <link rel="stylesheet" href="profile.css">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body class="dark">
+      <!-- Background particle effect -->
+      <canvas id="particleCanvas" class="particle-canvas"></canvas>
+
+      <!-- Loading overlay -->
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+          <div class="loading-spinner">
+            <div class="spinner-ring spinner-ring-1"></div>
+            <div class="spinner-ring spinner-ring-2"></div>
+            <div class="spinner-ring spinner-ring-3"></div>
+            <div class="spinner-ring spinner-ring-4"></div>
+          </div>
+          <div class="loading-text">INITIALIZING FINANCIAL AI</div>
+        </div>
+      </div>
+
+      <!-- Warning overlay for bank statement -->
+      <div id="warningOverlay" class="warning-overlay">
+        <div class="warning-content">
+          <div class="warning-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 9V13" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 17H12.01" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64149 19.6871 1.81442 19.9905C1.98736 20.2939 2.23672 20.5467 2.53773 20.7239C2.83875 20.901 3.1808 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="warning-title">Important Notice</h2>
+          <p class="warning-message">Please upload your latest bank statement (PDF format) to view your financial dashboard. This ensures your data is accurate and up-to-date.</p>
+          <div class="upload-container">
+            <input type="file" id="statementUpload" accept="application/pdf" class="upload-input">
+            <button id="analyzeButton" class="analyze-button" disabled>Analyze Statement</button>
+          </div>
+          <div id="uploadStatus" class="upload-status"></div>
+        </div>
+      </div>
+
+      <div class="container">
+        <!-- Header -->
+        <header class="header">
+          <div class="logo">
+            <span class="logo-text">FinMentor<span class="logo-highlight">AI</span></span>
+          </div>
+
+          <div class="header-controls">
+            <div class="search-bar">
+              <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" placeholder="Search accounts, transactions...">
+            </div>
+
+            <div class="header-actions">
+              <button class="icon-button notification-button">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="notification-indicator"></span>
+              </button>
+
+              <button id="themeToggle" class="icon-button theme-button">
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 12.79C20.8427 14.4922 20.2039 16.1144 19.1582 17.4668C18.1126 18.8192 16.7035 19.8458 15.0957 20.4265C13.4879 21.0073 11.748 21.1181 10.0795 20.7461C8.41104 20.3741 6.88302 19.5345 5.67425 18.3258C4.46548 17.117 3.62596 15.589 3.25393 13.9205C2.8819 12.252 2.99274 10.5121 3.57348 8.9043C4.15423 7.29651 5.18085 5.88737 6.53324 4.84175C7.88562 3.79614 9.50782 3.15731 11.21 3C10.2134 4.34827 9.73385 6.00945 9.85853 7.68141C9.98322 9.35338 10.7039 10.9251 11.8894 12.1106C13.0749 13.2961 14.6466 14.0168 16.3186 14.1415C17.9906 14.2662 19.6517 13.7866 21 12.79Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 17C14.7614 17 17 14.7614 17 12C17 9.23858 14.7614 7 12 7C9.23858 7 7 9.23858 7 12C7 14.7614 9.23858 17 12 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 1V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 21V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4.22 4.22L5.64 5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.36 18.36L19.78 19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M1 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 12H23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M4.22 19.78L5.64 18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.36 5.64L19.78 4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+
+              <div class="user-avatar">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User">
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="main-content">
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <div class="card sidebar-card">
+              <div class="sidebar-content">
+                <nav class="sidebar-nav">
+                  <button class="nav-item active" data-section="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M9 19V13C9 12.4477 8.55228 12 8 12H5C4.44772 12 4 12.4477 4 13V19C4 19.5523 4.44772 20 5 20H8C8.55228 20 9 19.5523 9 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M20 19V10C20 9.44772 19.5523 9 19 9H16C15.4477 9 15 9.44772 15 10V19C15 19.5523 15.4477 20 16 20H19C19.5523 20 20 19.5523 20 19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M3 5L12 3L21 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Dashboard
+                  </button>
+                  <button class="nav-item" data-section="budget">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 4H3C1.89543 4 1 4.89543 1 6V18C1 19.1046 1.89543 20 3 20H21C22.1046 20 23 19.1046 23 18V6C23 4.89543 22.1046 4 21 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M1 10H23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Budget
+                  </button>
+                  <button class="nav-item" data-section="transactions">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7 7H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7 12H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M7 17H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Transactions
+                  </button>
+                  <button class="nav-item" data-section="reports">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M10 9H9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Reports
+                  </button>
+                  <button class="nav-item" data-section="settings">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M19.4 15C19.2669 15.3016 19.2272 15.6362 19.286 15.9606C19.3448 16.285 19.4995 16.5843 19.73 16.82L19.79 16.88C19.976 17.0657 20.1235 17.2863 20.2241 17.5291C20.3248 17.7719 20.3766 18.0322 20.3766 18.295C20.3766 18.5578 20.3248 18.8181 20.2241 19.0609C20.1235 19.3037 19.976 19.5243 19.79 19.71C19.6043 19.896 19.3837 20.0435 19.1409 20.1441C18.8981 20.2448 18.6378 20.2966 18.375 20.2966C18.1122 20.2966 17.8519 20.2448 17.6091 20.1441C17.3663 20.0435 17.1457 19.896 16.96 19.71L16.9 19.65C16.6643 19.4195 16.365 19.2648 16.0406 19.206C15.7162 19.1472 15.3816 19.1869 15.08 19.32C14.7842 19.4468 14.532 19.6572 14.3543 19.9255C14.1766 20.1938 14.0813 20.5082 14.08 20.83V21C14.08 21.5304 13.8693 22.0391 13.4942 22.4142C13.1191 22.7893 12.6104 23 12.08 23C11.5496 23 11.0409 22.7893 10.6658 22.4142C10.2907 22.0391 10.08 21.5304 10.08 21V20.91C10.0723 20.579 9.96512 20.258 9.77251 19.9887C9.5799 19.7194 9.31074 19.5143 9 19.4C8.69838 19.2669 8.36381 19.2272 8.03941 19.286C7.71502 19.3448 7.41568 19.4995 7.18 19.73L7.12 19.79C6.93425 19.976 6.71368 20.1235 6.47088 20.2241C6.22808 20.3248 5.96783 20.3766 5.705 20.3766C5.44217 20.3766 5.18192 20.3248 4.93912 20.2241C4.69632 20.1235 4.47575 19.976 4.29 19.79C4.10405 19.6043 3.95653 19.3837 3.85588 19.1409C3.75523 18.8981 3.70343 18.6378 3.70343 18.375C3.70343 18.1122 3.75523 17.8519 3.85588 17.6091C3.95653 17.3663 4.10405 17.1457 4.29 16.96L4.35 16.9C4.58054 16.6643 4.73519 16.365 4.794 16.0406C4.85282 15.7162 4.81312 15.3816 4.68 15.08C4.55324 14.7842 4.34276 14.532 4.07447 14.3543C3.80618 14.1766 3.49179 14.0813 3.17 14.08H3C2.46957 14.08 1.96086 13.8693 1.58579 13.4942C1.21071 13.1191 1 12.6104 1 12.08C1 11.5496 1.21071 11.0409 1.58579 10.6658C1.96086 10.2907 2.46957 10.08 3 10.08H3.09C3.42099 10.0723 3.742 9.96512 4.0113 9.77251C4.28059 9.5799 4.48572 9.31074 4.6 9C4.73312 8.69838 4.77282 8.36381 4.714 8.03941C4.65519 7.71502 4.50054 7.41568 4.27 7.18L4.21 7.12C4.02405 6.93425 3.87653 6.71368 3.77588 6.47088C3.67523 6.22808 3.62343 5.96783 3.62343 5.705C3.62343 5.44217 3.67523 5.18192 3.77588 4.93912C3.87653 4.69632 4.02405 4.47575 4.21 4.29C4.39575 4.10405 4.61632 3.95653 4.85912 3.85588C5.10192 3.75523 5.36217 3.70343 5.625 3.70343C5.88783 3.70343 6.14808 3.75523 6.39088 3.85588C6.63368 3.95653 6.85425 4.10405 7.04 4.29L7.1 4.35C7.33568 4.58054 7.63502 4.73519 7.95941 4.794C8.28381 4.85282 8.61838 4.81312 8.92 4.68H9C9.29577 4.55324 9.54802 4.34276 9.72569 4.07447C9.90337 3.80618 9.99872 3.49179 10 3.17V3C10 2.46957 10.2107 1.96086 10.5858 1.58579C10.9609 1.21071 11.4696 1 12 1C12.5304 1 13.0391 1.21071 13.4142 1.58579C13.7893 1.96086 14 2.46957 14 3V3.09C14.0013 3.41179 14.0966 3.72618 14.2743 3.99447C14.452 4.26276 14.7042 4.47324 15 4.6C15.3016 4.73312 15.6362 4.77282 15.9606 4.714C16.285 4.65519 16.5843 4.50054 16.82 4.27L16.88 4.21C17.0657 4.02405 17.2863 3.87653 17.5291 3.77588C17.7719 3.67523 18.0322 3.62343 18.295 3.62343C18.5578 3.62343 18.8181 3.67523 19.0609 3.77588C19.3037 3.87653 19.5243 4.02405 19.71 4.21C19.896 4.39575 20.0435 4.61632 20.1441 4.85912C20.2448 5.10192 20.2966 5.36217 20.2966 5.625C20.2966 5.88783 20.2448 6.14808 20.1441 6.39088C20.0435 6.63368 19.896 6.85425 19.71 7.04L19.65 7.1C19.4195 7.33568 19.2648 7.63502 19.206 7.95941C19.1472 8.28381 19.1869 8.61838 19.32 8.92V9C19.4468 9.29577 19.6572 9.54802 19.9255 9.72569C20.1938 9.90337 20.5082 9.99872 20.83 10H21C21.5304 10 22.0391 10.2107 22.4142 10.5858C22.7893 10.9609 23 11.4696 23 12C23 12.5304 22.7893 13.0391 22.4142 13.4142C22.0391 13.7893 21.5304 14 21 14H20.91C20.5882 14.0013 20.2738 14.0966 20.0055 14.2743C19.7372 14.452 19.5268 14.7042 19.4 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Settings
+                  </button>
+                </nav>
+
+                <div class="sidebar-divider"></div>
+
+                <div class="financial-health">
+                  <h3 class="section-title">Financial Health</h3>
+                  <div class="status-items">
+                    <div class="status-item">
+                      <div class="status-header">
+                        <span>Overall Score</span>
+                        <span>85%</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%; background: linear-gradient(to right, #10B981, #3B82F6);"></div>
+                      </div>
+                    </div>
+                    <div class="status-item">
+                      <div class="status-header">
+                        <span>Savings Rate</span>
+                        <span>62%</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 62%; background: linear-gradient(to right, #10B981, #059669);"></div>
+                      </div>
+                    </div>
+                    <div class="status-item">
+                      <div class="status-header">
+                        <span>Debt Ratio</span>
+                        <span>28%</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 28%; background: linear-gradient(to right, #3B82F6, #2563EB);"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Dashboard Section -->
+          <div class="dashboard">
+            <div class="dashboard-grid">
+              <!-- Portfolio overview -->
+              <div class="card main-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 14H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M21 6H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M21 10H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M21 18H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Portfolio Overview
+                  </div>
+                  <div class="card-actions">
+                    <div class="badge live-badge">
+                      <div class="badge-indicator"></div>
+                      LIVE
+                    </div>
+                    <button class="icon-button refresh-button">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M23 4V10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3.51 9.00001C4.01717 7.56455 4.87913 6.2854 6.01547 5.27543C7.1518 4.26547 8.52547 3.55978 10.0083 3.22427C11.4911 2.88877 13.0348 2.93434 14.5 3.35677C15.9652 3.77921 17.3168 4.56471 18.4413 5.64182C19.5659 6.71893 20.4303 8.03256 20.9614 9.49997" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20.49 15C19.9828 16.4355 19.1209 17.7146 17.9845 18.7246C16.8482 19.7345 15.4745 20.4402 13.9917 20.7757C12.5089 21.1112 10.9652 21.0657 9.49999 20.6432C8.03481 20.2208 6.68317 19.4353 5.5586 18.3582C4.43403 17.2811 3.56968 15.9674 3.03857 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="metrics-grid">
+                    <div class="metric-card cyan">
+                      <div class="metric-header">
+                        <div class="metric-title">Total Assets</div>
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                      <div class="metric-value">$0</div>
+                      <div class="metric-detail">0% this month</div>
+                      <div class="metric-trend up">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M23 6L13.5 15.5L8.5 10.5L1 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M17 6H23V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="metric-card purple">
+                      <div class="metric-header">
+                        <div class="metric-title">Investments</div>
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M14.31 8L20.05 17.94" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M9.69 8L3.95 17.94" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M22 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M12 2V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                      <div class="metric-value">$0</div>
+                      <div class="metric-detail">0% of portfolio</div>
+                      <div class="metric-trend stable">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M22 12H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M16 6L22 12L16 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div class="metric-card blue">
+                      <div class="metric-header">
+                        <div class="metric-title">Cash & Savings</div>
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M3 7L12 13L21 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                      <div class="metric-value">$0</div>
+                      <div class="metric-detail">0% interest rate</div>
+                      <div class="metric-trend up">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M23 6L13.5 15.5L8.5 10.5L1 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          <path d="M17 6H23V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chart-container">
+                    <div class="chart-header">
+                      <div class="chart-tabs">
+                        <button class="chart-tab active" data-chart="performance">Performance</button>
+                        <button class="chart-tab" data-chart="allocation">Allocation</button>
+                        <button class="chart-tab" data-chart="growth">Growth</button>
+                      </div>
+
+                      <div class="chart-legend">
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #10B981;"></div>
+                          <div class="legend-label">Stocks</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                          <div class="legend-label">Bonds</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #3B82F6;"></div>
+                          <div class="legend-label">Cash</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="chart">
+                      <canvas id="performanceChart" height="250"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Budget & Expenses -->
+              <div class="card-row">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Budget Status
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="budget-status">
+                      <div class="budget-item">
+                        <div class="budget-header">
+                          <div>Monthly Budget</div>
+                          <div class="budget-amount">$5,200 / $6,000</div>
+                        </div>
+                        <div class="progress-bar">
+                          <div class="progress-fill" style="width: 86.7%; background: linear-gradient(to right, #10B981, #059669);"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="budget-categories">
+                        <div class="budget-category">
+                          <div class="category-header">
+                            <div>Housing</div>
+                            <div>$1,800 / $2,000</div>
+                          </div>
+                          <div class="progress-bar small">
+                            <div class="progress-fill" style="width: 90%; background-color: #10B981;"></div>
+                          </div>
+                        </div>
+                        
+                        <div class="budget-category">
+                          <div class="category-header">
+                            <div>Food</div>
+                            <div>$850 / $800</div>
+                          </div>
+                          <div class="progress-bar small">
+                            <div class="progress-fill" style="width: 106%; background-color: #F59E0B;"></div>
+                          </div>
+                        </div>
+                        
+                        <div class="budget-category">
+                          <div class="category-header">
+                            <div>Transportation</div>
+                            <div>$450 / $600</div>
+                          </div>
+                          <div class="progress-bar small">
+                            <div class="progress-fill" style="width: 75%; background-color: #3B82F6;"></div>
+                          </div>
+                        </div>
+                        
+                        <div class="budget-category">
+                          <div class="category-header">
+                            <div>Entertainment</div>
+                            <div>$320 / $300</div>
+                          </div>
+                          <div class="progress-bar small">
+                            <div class="progress-fill" style="width: 107%; background-color: #F59E0B;"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Risk Assessment
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="risk-items">
+                      <div class="risk-item">
+                        <div class="risk-header">
+                          <div>Portfolio Risk</div>
+                          <div class="badge green-badge">Moderate</div>
+                        </div>
+                        <div class="risk-detail">Your portfolio has a balanced risk profile</div>
+                      </div>
+                      
+                      <div class="risk-item">
+                        <div class="risk-header">
+                          <div>Diversification</div>
+                          <div class="badge green-badge">Good</div>
+                        </div>
+                        <div class="risk-detail">Assets are well diversified across sectors</div>
+                      </div>
+                      
+                      <div class="risk-item">
+                        <div class="risk-header">
+                          <div>Emergency Fund</div>
+                          <div class="badge yellow-badge">Attention</div>
+                        </div>
+                        <div class="risk-detail">2.1 months of expenses (target: 6 months)</div>
+                      </div>
+                      
+                      <div class="risk-item">
+                        <div class="risk-header">
+                          <div>Debt-to-Income</div>
+                          <div class="badge green-badge">Healthy</div>
+                        </div>
+                        <div class="risk-detail">28% (recommended: below 36%)</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transactions & Alerts -->
+              <div class="card-row">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M9 7H7V17H9V7Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M17 7H15V17H17V7Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M13 7H11V17H13V7Z" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Recent Transactions
+                    </div>
+                    <div class="badge blue-badge">12 New</div>
+                  </div>
+                  <section id="recentTransactions">
+                    <div class="card">
+                      <ul id="transactionList" class="transaction-list">
+                        <!-- Transactions will be inserted here dynamically -->
+                      </ul>
+                    </div>
+                  </section>
+                  <div class="card-footer">
+                    <button class="text-button">View All Transactions</button>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64149 19.6871 1.81442 19.9905C1.98736 20.2939 2.23672 20.5467 2.53773 20.7239C2.83875 20.901 3.1808 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 9V13" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 17H12.01" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Financial Alerts
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="alerts">
+                      <div class="alert info">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Investment Opportunity</div>
+                            <div class="alert-time">2h ago</div>
+                          </div>
+                          <div class="alert-message">Tech sector showing strong growth potential based on your preferences</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert warning">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64149 19.6871 1.81442 19.9905C1.98736 20.2939 2.23672 20.5467 2.53773 20.7239C2.83875 20.901 3.1808 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Unusual Spending</div>
+                            <div class="alert-time">Yesterday</div>
+                          </div>
+                          <div class="alert-message">Entertainment category spending is 32% higher than your monthly average</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert success">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Savings Goal Reached</div>
+                            <div class="alert-time">2 days ago</div>
+                          </div>
+                          <div class="alert-message">Congratulations! You've reached your vacation savings goal of $2,500</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert info">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Bill Payment Due</div>
+                            <div class="alert-time">3 days ago</div>
+                          </div>
+                          <div class="alert-message">Credit card payment of $450 is due in 3 days</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial News & AI Assistant -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    AI Financial Assistant
+                  </div>
+                  <div class="badge purple-badge">
+                    AI Powered
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                      <div class="message ai">
+                        <div class="message-avatar">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12H22" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="message-content">
+                          <p>Hello! I'm your AI financial assistant. Based on your recent spending patterns and financial goals, I have a few insights for you today.</p>
+                        </div>
+                      </div>
+                      <div class="message ai">
+                        <div class="message-avatar">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12H22" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="message-content">
+                          <p>Your emergency fund is currently at 2.1 months of expenses. I recommend increasing your monthly savings by $350 to reach your 6-month target by June.</p>
+                        </div>
+                      </div>
+                      <div class="message user">
+                        <div class="message-content">
+                          <p>Thanks for the advice. What about my investment portfolio? Any recommendations there?</p>
+                        </div>
+                      </div>
+                      <div class="message ai">
+                        <div class="message-avatar">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M2 12H22" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="message-content">
+                          <p>Based on your risk profile and market conditions, I suggest rebalancing your portfolio to increase exposure to renewable energy and healthcare sectors. These areas show strong growth potential for the next 12-18 months.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="chat-input">
+                      <input type="text" id="messageInput" placeholder="Ask about your finances...">
+                      <div class="chat-actions">
+                        <button class="icon-button mic-button">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 1C11.2044 1 10.4413 1.31607 9.87868 1.87868C9.31607 2.44129 9 3.20435 9 4V12C9 12.7956 9.31607 13.5587 9.87868 14.1213C10.4413 14.6839 11.2044 15 12 15C12.7956 15 13.5587 14.6839 14.1213 14.1213C14.6839 13.5587 15 12.7956 15 12V4C15 3.20435 14.6839 2.44129 14.1213 1.87868C13.5587 1.31607 12.7956 1 12 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 10V12C19 13.8565 18.2625 15.637 16.9497 16.9497C15.637 18.2625 13.8565 19 12 19C10.1435 19 8.36301 18.2625 7.05025 16.9497C5.7375 15.637 5 13.8565 5 12V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </button>
+                        <button class="icon-button send-button" id="sendButton">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right sidebar -->
+          <aside class="right-sidebar">
+            <div class="sidebar-widgets">
+              <!-- Date and time widget -->
+              <div class="card time-card">
+                <div class="time-content">
+                  <div class="time-header">SYSTEM TIME</div>
+                  <div class="current-time" id="currentTime">15:45:23</div>
+                  <div class="current-date" id="currentDate">Oct 14, 2023</div>
+                </div>
+                <div class="time-footer">
+                  <div class="time-stat">
+                    <div class="stat-label">Market Open</div>
+                    <div class="stat-value" id="marketStatus">5h 14m</div>
+                  </div>
+                  <div class="time-stat">
+                    <div class="stat-label">Trading Day</div>
+                    <div class="stat-value">Active</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Asset allocation -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Asset Allocation</div>
+                </div>
+                <div class="card-content">
+                  <div class="allocation-chart">
+                    <canvas id="allocationChart" height="180"></canvas>
+                  </div>
+                  <div class="allocation-legend">
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: #10B981;"></div>
+                      <div class="legend-label">Stocks (45%)</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: #3B82F6;"></div>
+                      <div class="legend-label">Bonds (25%)</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                      <div class="legend-label">Real Estate (15%)</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: #F59E0B;"></div>
+                      <div class="legend-label">Cash (10%)</div>
+                    </div>
+                    <div class="legend-item">
+                      <div class="legend-color" style="background-color: #EC4899;"></div>
+                      <div class="legend-label">Alternatives (5%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Financial goals -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Financial Goals</div>
+                </div>
+                <div class="card-content">
+                  <div class="goals">
+                    <div class="goal">
+                      <div class="goal-header">
+                        <div class="goal-title">Retirement</div>
+                        <div class="goal-amount">$850,000</div>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 32%; background: linear-gradient(to right, #10B981, #059669);"></div>
+                      </div>
+                      <div class="goal-stats">
+                        <div class="goal-progress">$272,000 saved</div>
+                        <div class="goal-eta">Est. 2048</div>
+                      </div>
+                    </div>
+                    
+                    <div class="goal">
+                      <div class="goal-header">
+                        <div class="goal-title">Home Purchase</div>
+                        <div class="goal-amount">$120,000</div>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%; background: linear-gradient(to right, #3B82F6, #2563EB);"></div>
+                      </div>
+                      <div class="goal-stats">
+                        <div class="goal-progress">$78,000 saved</div>
+                        <div class="goal-eta">Est. 2025</div>
+                      </div>
+                    </div>
+                    
+                    <div class="goal">
+                      <div class="goal-header">
+                        <div class="goal-title">Vacation</div>
+                        <div class="goal-amount">$8,000</div>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%; background: linear-gradient(to right, #8B5CF6, #7C3AED);"></div>
+                      </div>
+                      <div class="goal-stats">
+                        <div class="goal-progress">$7,200 saved</div>
+                        <div class="goal-eta">Est. 2024</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Budget Section -->
+      <div id="budgetSection" class="dashboard-section" style="display: none;">
+        <div class="dashboard-grid">
+          <div class="card main-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 4H3C1.89543 4 1 4.89543 1 6V18C1 19.1046 1.89543 20 3 20H21C22.1046 20 23 19.1046 23 18V6C23 4.89543 22.1046 4 21 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M1 10H23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Budget Overview
+              </div>
+              <div class="card-actions">
+                <div class="badge green-badge">Monthly</div>
+                <button class="icon-button refresh-button">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 4V10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3.51 9.00001C4.01717 7.56455 4.87913 6.2854 6.01547 5.27543C7.1518 4.26547 8.52547 3.55978 10.0083 3.22427C11.4911 2.88877 13.0348 2.93434 14.5 3.35677C15.9652 3.77921 17.3168 4.56471 18.4413 5.64182C19.5659 6.71893 20.4303 8.03256 20.9614 9.49997" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20.49 15C19.9828 16.4355 19.1209 17.7146 17.9845 18.7246C16.8482 19.7345 15.4745 20.4402 13.9917 20.7757C12.5089 21.1112 10.9652 21.0657 9.49999 20.6432C8.03481 20.2208 6.68317 19.4353 5.5586 18.3582C4.43403 17.2811 3.56968 15.9674 3.03857 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="metrics-grid">
+                <div class="metric-card cyan">
+                  <div class="metric-header">
+                    <div class="metric-title">Total Budget</div>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="metric-value">$6,000.00</div>
+                  <div class="metric-detail">Monthly allocation</div>
+                </div>
+                <div class="metric-card purple">
+                  <div class="metric-header">
+                    <div class="metric-title">Spent</div>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="metric-value">$5,200.00</div>
+                  <div class="metric-detail">86.7% of budget</div>
+                </div>
+                <div class="metric-card blue">
+                  <div class="metric-header">
+                    <div class="metric-title">Remaining</div>
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 1V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="metric-value">$800.00</div>
+                  <div class="metric-detail">13.3% left</div>
+                </div>
+              </div>
+      
+              <div class="card-row">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Category Breakdown
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="budget-categories">
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Housing</div>
+                          <div>$1,800 / $2,000</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 90%; background-color: #10B981;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Food</div>
+                          <div>$850 / $800</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 106%; background-color: #F59E0B;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Transportation</div>
+                          <div>$450 / $600</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 75%; background-color: #3B82F6;"></div>
+                        </div>
+                      </div>
+                      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Entertainment</div>
+                          <div>$320 / $300</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 107%; background-color: #F59E0B;"></div>
+                        </div>
+                      </div>
+      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Utilities</div>
+                          <div>$280 / $350</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 80%; background-color: #10B981;"></div>
+                        </div>
+                      </div>
+      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Healthcare</div>
+                          <div>$220 / $250</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 88%; background-color: #10B981;"></div>
+                        </div>
+                      </div>
+      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Shopping</div>
+                          <div>$380 / $350</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 109%; background-color: #F59E0B;"></div>
+                        </div>
+                      </div>
+      
+                      <div class="budget-category">
+                        <div class="category-header">
+                          <div>Savings</div>
+                          <div>$900 / $900</div>
+                        </div>
+                        <div class="progress-bar small">
+                          <div class="progress-fill" style="width: 100%; background-color: #10B981;"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+      
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Budget Insights
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="alerts">
+                      <div class="alert warning">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64149 19.6871 1.81442 19.9905C1.98736 20.2939 2.23672 20.5467 2.53773 20.7239C2.83875 20.901 3.1808 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Food Budget Exceeded</div>
+                            <div class="alert-time">Today</div>
+                          </div>
+                          <div class="alert-message">You've exceeded your food budget by $50 (6.25% over budget)</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert warning">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.29 3.86L1.82 18C1.64537 18.3024 1.55296 18.6453 1.55199 18.9945C1.55101 19.3437 1.64149 19.6871 1.81442 19.9905C1.98736 20.2939 2.23672 20.5467 2.53773 20.7239C2.83875 20.901 3.1808 20.9962 3.53 21H20.47C20.8192 20.9962 21.1613 20.901 21.4623 20.7239C21.7633 20.5467 22.0126 20.2939 22.1856 19.9905C22.3585 19.6871 22.449 19.3437 22.448 18.9945C22.447 18.6453 22.3546 18.3024 22.18 18L13.71 3.86C13.5317 3.56611 13.2807 3.32312 12.9812 3.15448C12.6817 2.98585 12.3437 2.89725 12 2.89725C11.6563 2.89725 11.3183 2.98585 11.0188 3.15448C10.7193 3.32312 10.4683 3.56611 10.29 3.86Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 9V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 17H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Entertainment Budget Exceeded</div>
+                            <div class="alert-time">Yesterday</div>
+                          </div>
+                          <div class="alert-message">You've exceeded your entertainment budget by $20 (6.67% over budget)</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert success">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Transportation Under Budget</div>
+                            <div class="alert-time">This Month</div>
+                          </div>
+                          <div class="alert-message">You're $150 under your transportation budget (25% savings)</div>
+                        </div>
+                      </div>
+                      
+                      <div class="alert info">
+                        <div class="alert-icon">
+                          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 16V12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                        </div>
+                        <div class="alert-content">
+                          <div class="alert-header">
+                            <div class="alert-title">Budget Recommendation</div>
+                            <div class="alert-time">3 days ago</div>
+                          </div>
+                          <div class="alert-message">Consider increasing your food budget by $50 based on your 3-month average</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Transactions Section -->
+      <div id="transactionsSection" class="dashboard-section" style="display: none;">
+        <div class="dashboard-grid">
+          <div class="card main-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 7H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 12H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 17H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Transaction History
+              </div>
+              <div class="card-actions">
+                <div class="badge blue-badge">
+                  Last 30 Days
+                </div>
+                <button class="icon-button refresh-button">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M23 4V10H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M1 20V14H7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M3.51 9.00001C4.01717 7.56455 4.87913 6.2854 6.01547 5.27543C7.1518 4.26547 8.52547 3.55978 10.0083 3.22427C11.4911 2.88877 13.0348 2.93434 14.5 3.35677C15.9652 3.77921 17.3168 4.56471 18.4413 5.64182C19.5659 6.71893 20.4303 8.03256 20.9614 9.49997" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M20.49 15C19.9828 16.4355 19.1209 17.7146 17.9845 18.7246C16.8482 19.7345 15.4745 20.4402 13.9917 20.7757C12.5089 21.1112 10.9652 21.0657 9.49999 20.6432C8.03481 20.2208 6.68317 19.4353 5.5586 18.3582C4.43403 17.2811 3.56968 15.9674 3.03857 14.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="transaction-filters">
+                <div class="filter-group">
+                  <input type="text" placeholder="Search transactions..." class="filter-input" id="transactionSearch">
+                  <select class="filter-select" id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="housing">Housing</option>
+                    <option value="food">Food</option>
+                    <option value="transportation">Transportation</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="healthcare">Healthcare</option>
+                    <option value="shopping">Shopping</option>
+                  </select>
+                  <select class="filter-select" id="accountFilter">
+                    <option value="all">All Accounts</option>
+                    <option value="checking">Checking</option>
+                    <option value="savings">Savings</option>
+                    <option value="credit">Credit Card</option>
+                    <option value="investment">Investment</option>
+                  </select>
+                  <button class="filter-button" id="applyFilters">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22 3H2L10 12.46V19L14 21V12.46L22 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Filter
+                  </button>
+                </div>
+              </div>
+      
+              <div class="transaction-list" id="transactionList">
+                <div class="transaction-item">
+                  <div class="transaction-icon expense">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 8L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Whole Foods Market</div>
+                    <div class="transaction-category">Food & Groceries</div>
+                    <div class="transaction-date">Today, 7:32 PM</div>
+                  </div>
+                  <div class="transaction-account">Checking •••4582</div>
+                  <div class="transaction-amount expense">-$84.32</div>
+                </div>
+      
+                <div class="transaction-item">
+                  <div class="transaction-icon deposit">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 16L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M8 12L12 8L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Salary Deposit</div>
+                    <div class="transaction-category">Income</div>
+                    <div class="transaction-date">Today, 9:45 AM</div>
+                  </div>
+                  <div class="transaction-account">Checking •••4582</div>
+                  <div class="transaction-amount deposit">+$3,250.00</div>
+                </div>
+      
+                <div class="transaction-item">
+                  <div class="transaction-icon expense">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 8L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Netflix Subscription</div>
+                    <div class="transaction-category">Entertainment</div>
+                    <div class="transaction-date">Yesterday, 3:15 PM</div>
+                  </div>
+                  <div class="transaction-account">Credit Card •••7890</div>
+                  <div class="transaction-amount expense">-$14.99</div>
+                </div>
+      
+                <div class="transaction-item">
+                  <div class="transaction-icon expense">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 8L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Uber Ride</div>
+                    <div class="transaction-category">Transportation</div>
+                    <div class="transaction-date">Oct 12, 8:45 PM</div>
+                  </div>
+                  <div class="transaction-account">Credit Card •••7890</div>
+                  <div class="transaction-amount expense">-$24.50</div>
+                </div>
+      
+                <div class="transaction-item">
+                  <div class="transaction-icon expense">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 8L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Amazon.com</div>
+                    <div class="transaction-category">Shopping</div>
+                    <div class="transaction-date">Oct 10, 2:30 PM</div>
+                  </div>
+                  <div class="transaction-account">Credit Card •••7890</div>
+                  <div class="transaction-amount expense">-$67.94</div>
+                </div>
+      
+                <div class="transaction-item">
+                  <div class="transaction-icon expense">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 8L12 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M16 12L12 16L8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="transaction-details">
+                    <div class="transaction-title">Rent Payment</div>
+                    <div class="transaction-category">Housing</div>
+                    <div class="transaction-date">Oct 1, 9:00 AM</div>
+                  </div>
+                  <div class="transaction-account">Checking •••4582</div>
+                  <div class="transaction-amount expense">-$1,800.00</div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <button class="text-button" id="viewAllTransactions">View All Transactions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Reports Section -->
+      <div id="reportsSection" class="dashboard-section" style="display: none;">
+        <div class="dashboard-grid">
+          <div class="card main-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 9H9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Financial Reports
+              </div>
+              <div class="card-actions">
+                <select class="report-period-select" id="reportPeriod">
+                  <option value="month">This Month</option>
+                  <option value="quarter">This Quarter</option>
+                  <option value="year">This Year</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+                <button class="icon-button download-button">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="report-tabs">
+                <button class="report-tab active" data-report="income">Income & Expenses</button>
+                <button class="report-tab" data-report="networth">Net Worth</button>
+                <button class="report-tab" data-report="cashflow">Cash Flow</button>
+              </div>
+      
+              <div class="report-content">
+                <div class="chart-container large">
+                  <canvas id="incomeExpensesChart" height="300"></canvas>
+                </div>
+      
+                <div class="report-summary">
+                  <div class="summary-card">
+                    <div class="summary-title">Total Income</div>
+                    <div class="summary-value">$6,250.00</div>
+                    <div class="summary-change up">+12.5% from last month</div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-title">Total Expenses</div>
+                    <div class="summary-value">$5,200.00</div>
+                    <div class="summary-change down">-3.2% from last month</div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-title">Savings</div>
+                    <div class="summary-value">$1,050.00</div>
+                    <div class="summary-change up">+32.8% from last month</div>
+                  </div>
+                  <div class="summary-card">
+                    <div class="summary-title">Savings Rate</div>
+                    <div class="summary-value">16.8%</div>
+                    <div class="summary-change up">+5.2% from last month</div>
+                  </div>
+                </div>
+      
+                <div class="report-details">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">Income Breakdown</div>
+                    </div>
+                    <div class="card-content">
+                      <div class="pie-chart-container">
+                        <canvas id="incomeBreakdownChart" height="200"></canvas>
+                      </div>
+                      <div class="chart-legend">
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #10B981;"></div>
+                          <div class="legend-label">Salary (85%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #3B82F6;"></div>
+                          <div class="legend-label">Investments (10%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                          <div class="legend-label">Side Hustle (5%)</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+      
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">Expense Breakdown</div>
+                    </div>
+                    <div class="card-content">
+                      <div class="pie-chart-container">
+                        <canvas id="expenseBreakdownChart" height="200"></canvas>
+                      </div>
+                      <div class="chart-legend">
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #10B981;"></div>
+                          <div class="legend-label">Housing (35%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #3B82F6;"></div>
+                          <div class="legend-label">Food (16%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                          <div class="legend-label">Transportation (9%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #F59E0B;"></div>
+                          <div class="legend-label">Entertainment (6%)</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background-color: #EC4899;"></div>
+                          <div class="legend-label">Other (34%)</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings Section -->
+      <div id="settingsSection" class="dashboard-section" style="display: none;">
+        <div class="dashboard-grid">
+          <div class="card main-card">
+            <div class="card-header">
+              <div class="card-title">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M19.4 15C19.2669 15.3016 19.2272 15.6362 19.286 15.9606C19.3448 16.285 19.4995 16.5843 19.73 16.82L19.79 16.88C19.976 17.0657 20.1235 17.2863 20.2241 17.5291C20.3248 17.7719 20.3766 18.0322 20.3766 18.295C20.3766 18.5578 20.3248 18.8181 20.2241 19.0609C20.1235 19.3037 19.976 19.5243 19.79 19.71C19.6043 19.896 19.3837 20.0435 19.1409 20.1441C18.8981 20.2448 18.6378 20.2966 18.375 20.2966C18.1122 20.2966 17.8519 20.2448 17.6091 20.1441C17.3663 20.0435 17.1457 19.896 16.96 19.71L16.9 19.65C16.6643 19.4195 16.365 19.2648 16.0406 19.206C15.7162 19.1472 15.3816 19.1869 15.08 19.32C14.7842 19.4468 14.532 19.6572 14.3543 19.9255C14.1766 20.1938 14.0813 20.5082 14.08 20.83V21C14.08 21.5304 13.8693 22.0391 13.4942 22.4142C13.1191 22.7893 12.6104 23 12.08 23C11.5496 23 11.0409 22.7893 10.6658 22.4142C10.2907 22.0391 10.08 21.5304 10.08 21V20.91C10.0723 20.579 9.96512 20.258 9.77251 19.9887C9.5799 19.7194 9.31074 19.5143 9 19.4C8.69838 19.2669 8.36381 19.2272 8.03941 19.286C7.71502 19.3448 7.41568 19.4995 7.18 19.73L7.12 19.79C6.93425 19.976 6.71368 20.1235 6.47088 20.2241C6.22808 20.3248 5.96783 20.3766 5.705 20.3766C5.44217 20.3766 5.18192 20.3248 4.93912 20.2241C4.69632 20.1235 4.47575 19.976 4.29 19.79C4.10405 19.6043 3.95653 19.3837 3.85588 19.1409C3.75523 18.8981 3.70343 18.6378 3.70343 18.375C3.70343 18.1122 3.75523 17.8519 3.85588 17.6091C3.95653 17.3663 4.10405 17.1457 4.29 16.96L4.35 16.9C4.58054 16.6643 4.73519 16.365 4.794 16.0406C4.85282 15.7162 4.81312 15.3816 4.68 15.08C4.55324 14.7842 4.34276 14.532 4.07447 14.3543C3.80618 14.1766 3.49179 14.0813 3.17 14.08H3C2.46957 14.08 1.96086 13.8693 1.58579 13.4942C1.21071 13.1191 1 12.6104 1 12.08C1 11.5496 1.21071 11.0409 1.58579 10.6658C1.96086 10.2907 2.46957 10.08 3 10.08H3.09C3.42099 10.0723 3.742 9.96512 4.0113 9.77251C4.28059 9.5799 4.48572 9.31074 4.6 9C4.73312 8.69838 4.77282 8.36381 4.714 8.03941C4.65519 7.71502 4.50054 7.41568 4.27 7.18L4.21 7.12C4.02405 6.93425 3.87653 6.71368 3.77588 6.47088C3.67523 6.22808 3.62343 5.96783 3.62343 5.705C3.62343 5.44217 3.67523 5.18192 3.77588 4.93912C3.87653 4.69632 4.02405 4.47575 4.21 4.29C4.39575 4.10405 4.61632 3.95653 4.85912 3.85588C5.10192 3.75523 5.36217 3.70343 5.625 3.70343C5.88783 3.70343 6.14808 3.75523 6.39088 3.85588C6.63368 3.95653 6.85425 4.10405 7.04 4.29L7.1 4.35C7.33568 4.58054 7.63502 4.73519 7.95941 4.794C8.28381 4.85282 8.61838 4.81312 8.92 4.68H9C9.29577 4.55324 9.54802 4.34276 9.72569 4.07447C9.90337 3.80618 9.99872 3.49179 10 3.17V3C10 2.46957 10.2107 1.96086 10.5858 1.58579C10.9609 1.21071 11.4696 1 12 1C12.5304 1 13.0391 1.21071 13.4142 1.58579C13.7893 1.96086 14 2.46957 14 3V3.09C14.0013 3.41179 14.0966 3.72618 14.2743 3.99447C14.452 4.26276 14.7042 4.47324 15 4.6C15.3016 4.73312 15.6362 4.77282 15.9606 4.714C16.285 4.65519 16.5843 4.50054 16.82 4.27L16.88 4.21C17.0657 4.02405 17.2863 3.87653 17.5291 3.77588C17.7719 3.67523 18.0322 3.62343 18.295 3.62343C18.5578 3.62343 18.8181 3.67523 19.0609 3.77588C19.3037 3.87653 19.5243 4.02405 19.71 4.21C19.896 4.39575 20.0435 4.61632 20.1441 4.85912C20.2448 5.10192 20.2966 5.36217 20.2966 5.625C20.2966 5.88783 20.2448 6.14808 20.1441 6.39088C20.0435 6.63368 19.896 6.85425 19.71 7.04L19.65 7.1C19.4195 7.33568 19.2648 7.63502 19.206 7.95941C19.1472 8.28381 19.1869 8.61838 19.32 8.92V9C19.4468 9.29577 19.6572 9.54802 19.9255 9.72569C20.1938 9.90337 20.5082 9.99872 20.83 10H21C21.5304 10 22.0391 10.2107 22.4142 10.5858C22.7893 10.9609 23 11.4696 23 12C23 12.5304 22.7893 13.0391 22.4142 13.4142C22.0391 13.7893 21.5304 14 21 14H20.91C20.5882 14.0013 20.2738 14.0966 20.0055 14.2743C19.7372 14.452 19.5268 14.7042 19.4 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Settings
+              </div>
+            </div>
+            <div class="card-content">
+              <div class="settings-tabs">
+                <button class="settings-tab active" data-settings="profile">Profile</button>
+                <button class="settings-tab" data-settings="notifications">Notifications</button>
+                <button class="settings-tab" data-settings="security">Security</button>
+              </div>
+      
+              <div class="settings-content">
+                <div class="settings-section">
+                  <h3 class="settings-heading">Profile Information</h3>
+                  <form class="settings-form" id="profileForm">
+                    <div class="form-group">
+                      <label for="fullName">Full Name</label>
+                      <input type="text" id="fullName" value="Ramzan Kamzan" class="settings-input">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email Address</label>
+                      <input type="email" id="email" value="ramzan.Kamzan@example.com" class="settings-input">
+                    </div>
+                    <div class="form-group">
+                      <label for="phone">Phone Number</label>
+                      <input type="tel" id="phone" value="(555) 123-4567" class="settings-input">
+                    </div>
+                    <div class="form-group">
+                      <label for="address">Address</label>
+                      <textarea id="address" class="settings-textarea">123 Financial St, Money City, CA 90210</textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="currency">Currency</label>
+                      <select id="currency" class="settings-select">
+                        <option value="usd" selected>USD ($)</option>
+                        <option value="eur">EUR (€)</option>
+                        <option value="gbp">GBP (£)</option>
+                        <option value="jpy">JPY (¥)</option>
+                        <option value="cad">CAD ($)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label for="language">Language</label>
+                      <select id="language" class="settings-select">
+                        <option value="en" selected>English</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="zh">Chinese</option>
+                      </select>
+                    </div>
+                    <div class="form-actions">
+                      <button type="submit" class="settings-button primary">Save Changes</button>
+                      <button type="button" class="settings-button secondary">Cancel</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="profilestats.js"></script>
+    </body>
+    </html>

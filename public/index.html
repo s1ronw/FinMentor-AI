@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinMentor - Your Financial AI Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">FinMentor</div>
+            <ul class="nav-links">
+                <li><a href="#" class="active">Home</a></li>
+                <li><a href="ai-chat.html">AI Chat</a></li>
+                <li><a href="#">Pages</a></li>
+                <li><a href="contacts.html">Contacts</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="get-started-btn">Get Started</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Support Chat Button -->
+    <div class="support-chat-button" id="supportChatButton">
+        <img src="images/supportman.png" alt="Support" class="support-chat-avatar">
+        <span class="support-chat-badge" id="supportChatBadge">1</span>
+    </div>
+
+    <!-- New Message Notification -->
+    <div class="support-chat-notification hidden" id="supportChatNotification">
+        <h3>Нове повідомлення!</h3>
+        <p>Натисніть тут, щоб відкрити чат.</p>
+    </div>
+
+    <!-- Support Chat Container -->
+    <div class="support-chat-container hidden" id="supportChatContainer">
+        <div class="support-chat-header">
+            <img src="images/supportman.png" alt="Profile Picture" class="support-chat-profile-pic">
+            <button class="support-chat-minimize-btn" id="supportChatMinimizeBtn">⋯</button>
+        </div>
+        <div class="support-chat-body" id="supportChatBody">
+            <h2>Привіт 👋</h2>
+            <p>Ласкаво просимо до нашого чату FinMentor. Запитайте нас про що завгодно!</p>
+            <form class="support-chat-form">
+                <div class="support-chat-form-group">
+                    <label for="supportName">Ваше ім'я</label>
+                    <input type="text" id="supportName" placeholder="Іван Петренко">
+                </div>
+                <div class="support-chat-form-group">
+                    <label for="supportEmail">Email адреса</label>
+                    <input type="email" id="supportEmail" placeholder="ivan@example.com">
+                </div>
+                <div class="support-chat-form-group">
+                    <label for="supportMessage">Ваше повідомлення</label>
+                    <textarea id="supportMessage" rows="3" placeholder="Як ми можемо вам допомогти?"></textarea>
+                </div>
+                <button type="submit" class="support-chat-submit-btn" id="supportChatBtn">Почати чат <span>➡️</span></button>
+            </form>
+            <p class="support-chat-reply-text">Ми відповідаємо миттєво</p>
+        </div>
+        <div class="support-chat-footer">
+            <p>Працює на <span class="support-chat-brand">FinMentor</span></p>
+        </div>
+        <div class="support-chat-nav-bar">
+            <button class="support-chat-nav-btn">🏠 Головна</button>
+            <button class="support-chat-nav-btn">💬 Чат</button>
+        </div>
+    </div>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>FinMentor is the <img class="highlight" src="images/future.png" alt="future"></h1>
+        <video autoplay muted loop id="background-video">
+            <source src="video/video-main-bg.mp4" type="video/mp4">
+        </video>
+    </section>
+    <div class="sliding-buttons-container">
+        <div class="sliding-buttons-track">
+            <div class="sliding-button">FinAI</div>
+            <div class="sliding-button">Money Mind</div>
+            <div class="sliding-button">Wealth Wise</div>
+            <div class="sliding-button">Budget Bot</div>
+            <div class="sliding-button">Cash Coach</div>
+            <div class="sliding-button">Finance Friend</div>
+            <div class="sliding-button">Savings Sage</div>
+            <div class="sliding-button">Investment Intelligence</div>
+            <div class="sliding-button">Bank Brain</div>
+            <div class="sliding-button">Financial Futurist</div>
+            <div class="sliding-button">Money Master</div>
+            <div class="sliding-button">Budget Buddy</div>
+            <div class="sliding-button">Wealth Wizard</div>
+            <div class="sliding-button">Bank Brainiac</div>
+            <div class="sliding-button">Financial Fusion</div>
+            <div class="sliding-button">Money Maven</div>
+            <!-- Duplicate buttons for continuous scrolling effect -->
+            <div class="sliding-button">FinAI</div>
+            <div class="sliding-button">Money Mind</div>
+            <div class="sliding-button">Wealth Wise</div>
+            <div class="sliding-button">Budget Bot</div>
+            <div class="sliding-button">Cash Coach</div>
+            <div class="sliding-button">Finance Friend</div>
+            <div class="sliding-button">Savings Sage</div>
+            <div class="sliding-button">Investment Intelligence</div>
+            <div class="sliding-button">Bank Brain</div>
+            <div class="sliding-button">Financial Futurist</div>
+            <div class="sliding-button">Money Master</div>
+            <div class="sliding-button">Budget Buddy</div>
+            <div class="sliding-button">Wealth Wizard</div>
+            <div class="sliding-button">Bank Brainiac</div>
+            <div class="sliding-button">Financial Fusion</div>
+            <div class="sliding-button">Money Maven</div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="subtitle">WHAT WE DO</h2>
+            <div class="title-container">
+                <h1 class="title">Explore the power of AI development tools, crafted with brilliance, style, quality and creativity.</h1>
+            </div>
+            <p class="author"><strong>Peter Bowman</strong><br><span class="director">Creative Director</span></p>
+
+            <div class="features-grid">
+                <div class="feature excellent-support">
+                    <div class="icon">
+                        <img src="images/support.png" alt="Excellent Support Icon">
+                    </div>
+                    <h3>Excellent Support</h3>
+                    <p>Consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                </div>
+                <div class="feature reliable-experts">
+                    <div class="icon">
+                        <img src="images/guru.png" alt="Reliable Experts Icon">
+                    </div>
+                    <h3>Reliable Experts</h3>
+                    <p>Consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                </div>
+                <div class="feature endless-possibilities">
+                    <div class="icon">
+                        <img src="images/growth.png" alt="Endless Possibilities Icon">
+                    </div>
+                    <h3>Endless Possibilities</h3>
+                    <p>Consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                </div>
+                <div class="feature unique-technologies">
+                    <div class="icon">
+                        <img src="images/platform.png" alt="Unique Technologies Icon">
+                    </div>
+                    <h3>Unique Technologies</h3>
+                    <p>Consectetur adipiscing elit, sed do eiusmod tempor.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="sliding-text-container">
+            <div class="sliding-text">
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+                <span class="dot">•</span>
+                <span class="text">AI Financial Mentor</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq">
+        <div class="faq-container">
+            <div class="faq-content">
+                <h2>AI Financial Mentor FAQs</h2>
+    
+                <div class="faq-list">
+                    <details>
+                        <summary>What It Takes to Create an Image?</summary>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </details>
+                    <details>
+                        <summary>What's the Standard Image Size?</summary>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </details>
+                    <details>
+                        <summary>Can I Create Multiple Images at Once?</summary>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </details>
+                </div>
+    
+                <div class="faq-contact">
+                    <p>Still have questions? <a href="contacts.html">Contact us</a>.</p>
+                </div>
+            </div>
+    
+            <div class="faq-image">
+                <img src="images/image.jpg" alt="Financial AI Background" class="faq-bg-image">
+                <div class="stat-overlay">
+                    <div class="stat-item">
+                        <span class="stat-number">100+</span>
+                        <p>People</p>
+                        <span class="stat-description">Adipiscing elit, do eisum.</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">16</span>
+                        <p>World Offices</p>
+                        <span class="stat-description">Adipiscing elit, do eisum.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <h2>FinMentor</h2>
+                <p>AI financial tips from the finest Financial AI manager.</p>
+            </div>
+            <div class="footer-sections">
+                <div class="footer-section newsletter">
+                    <h3>Newsletter Signup</h3>
+                    <div class="newsletter-form">
+                        <input type="email" placeholder="Enter Your Email Address">
+                        <button type="submit">→</button>
+                    </div>
+                    <label class="privacy-checkbox">
+                        <input type="checkbox">
+                        <span>I agree to the Privacy Policy</span>
+                    </label>
+                </div>
+                <div class="footer-section socials">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>FinMentor © <span id="current-year"></span>. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

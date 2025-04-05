@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Stats</title>
+    <link rel="stylesheet" href="profilestats.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Transactions Section -->
+        <section id="transactions" class="section">
+            <h2>Transactions</h2>
+            
+            <!-- PDF Upload Section -->
+            <div class="pdf-upload-section">
+                <h3>Upload Bank Statement</h3>
+                <div class="upload-container">
+                    <input type="file" id="bankStatement" accept=".pdf" class="file-input">
+                    <label for="bankStatement" class="upload-button">
+                        <span>Choose PDF File</span>
+                    </label>
+                    <button id="processStatement" class="process-button">Process Statement</button>
+                </div>
+                <div id="uploadStatus" class="status-message"></div>
+            </div>
+
+            <!-- Transactions Table -->
+            <div class="transactions-table-container">
+                <table id="transactionsTable" class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsBody">
+                        <!-- Transactions will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="profilestats.js"></script>
+</body>
+</html> 
